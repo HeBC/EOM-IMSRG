@@ -318,9 +318,9 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   rvec= .true. 
   howmny = 'A'
   
-   allocate(selct(NCV)) 
-   selct = .false.
-   allocate(D(NEV)) 
+  allocate(selct(NCV)) 
+  selct = .false.
+  allocate(D(NEV)) 
   allocate(Z(N,NEV)) 
   D = 0.d0
   Z = 0.d0
@@ -480,9 +480,9 @@ subroutine LANCZOS_ISOSPIN_CHANGER(jbas,OP,Vecs,nev)
   rvec= .true. 
   howmny = 'A'
   
-   allocate(selct(NCV)) 
-   selct = .false.
-   allocate(D(NEV)) 
+  allocate(selct(NCV)) 
+  selct = .false.
+  allocate(D(NEV)) 
   allocate(Z(N,NEV)) 
   D = 0.d0
   Z = 0.d0
