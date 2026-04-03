@@ -196,7 +196,7 @@ subroutine duplicate_isospin_ladder(A,B)
   B%xindx = A%xindx
   B%herm = A%herm
   B%Aprot = A%Aprot
-  B%Aneut = B%Aneut
+  B%Aneut = A%Aneut
   B%Nsp = A%Nsp
   B%belowEF = A%belowEF
   B%nblocks = A%nblocks
