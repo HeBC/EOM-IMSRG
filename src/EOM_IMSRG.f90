@@ -659,6 +659,7 @@ subroutine unwrap( v, AX ,N ,jbas)
   real(8),dimension(N) :: v
   type(sq_op) :: AX 
   
+  call zero_sq_op_wkspc(AX)
   i = 1
   
   holes = AX%belowEF
@@ -1102,6 +1103,7 @@ subroutine unwrap_tensor( v, AX ,N ,jbas)
   real(8),dimension(N) :: v
   type(sq_op) :: AX 
   
+  call zero_sq_op_wkspc(AX)
   i = 1
   
   holes = AX%belowEF
@@ -1198,6 +1200,7 @@ subroutine unwrap_iso_ladder( v, AX ,N ,jbas)
   real(8),dimension(N) :: v
   type(iso_ladder) :: AX 
   
+  call zero_iso_ladder_wkspc(AX)
   i = 1
   
   holes = AX%belowEF
