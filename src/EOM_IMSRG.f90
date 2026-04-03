@@ -539,6 +539,7 @@ subroutine matvec_nonzeroX_prod(N,OP,Q_op,Qout,w1,w2,OpCC,QCC,WCC,jbas,v,w)
   call zero_sq_op_wkspc(Qout)
   call zero_sq_op_wkspc(w1)
   call zero_sq_op_wkspc(w2)
+  call zero_ex_pandya_wkspc(WCC)
 
   call unwrap_tensor(v,Q_op,N,jbas)
   ! now we have two sq_op operators which can be used with my commutator expressions. Noice. 
@@ -630,6 +631,21 @@ subroutine zero_sq_op_wkspc(OP)
      end do
   end if
 end subroutine zero_sq_op_wkspc
+!======================================================================================
+!======================================================================================
+subroutine zero_ex_pandya_wkspc(OP)
+  implicit none
+
+  type(ex_pandya_mat) :: OP
+  integer :: q
+
+  if (.not. allocated(OP%CCX)) return
+
+  do q = 1, size(OP%CCX)
+     if (allocated(OP%CCX(q)%X)) OP%CCX(q)%X = 0.d0
+     if (allocated(OP%CCR(q)%X)) OP%CCR(q)%X = 0.d0
+  end do
+end subroutine zero_ex_pandya_wkspc
 !======================================================================================
 !======================================================================================
 subroutine zero_iso_ladder_wkspc(OP)
