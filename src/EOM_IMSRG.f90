@@ -271,7 +271,7 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   which = 'SM' ! compute smallest eigenvalues in magnitude ('SA') is algebraic. 
   tol = 1.0E-10 ! error tolerance? (wtf zero?) 
   info = 0
-  ncv = min(N,max(20,5*nev)) ! number of lanczos vectors I guess
+  ncv = min(N,max(20,5*nev)) ! number of Lanczos basis vectors retained by ARPACK
   lworkl = ncv*(ncv+8) 
   allocate(V(N,NCV),workl(lworkl))
   LDV = N  
@@ -436,7 +436,7 @@ subroutine LANCZOS_ISOSPIN_CHANGER(jbas,OP,Vecs,nev)
   which = 'SM' ! compute smallest eigenvalues in magnitude ('SA') is algebraic. 
   tol = 1.0E-10 ! error tolerance? (wtf zero?) 
   info = 0
-  ncv = min(N,max(20,5*nev)) ! number of lanczos vectors I guess
+  ncv = min(N,max(20,5*nev)) ! number of Lanczos basis vectors retained by ARPACK
   lworkl = ncv*(ncv+8) 
   allocate(V(N,NCV),workl(lworkl))
   LDV = N  
