@@ -321,18 +321,28 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
    allocate(selct(NCV)) 
    selct = .false.
    allocate(D(NEV)) 
-   allocate(Z(N,NEV)) 
-   D = 0.d0
-   Z = 0.d0
-   ldz = N  
+  allocate(Z(N,NEV)) 
+  D = 0.d0
+  Z = 0.d0
+  ldz = N  
   nconv = iparam(5)
-  if (info < 0) stop 'ARPACK dsaupd failed in LANCZOS_DIAGONALIZE'
-  if (nconv < nev) stop 'ARPACK did not converge all requested states in LANCZOS_DIAGONALIZE'
+  if (info < 0) then
+     print*, 'ARPACK dsaupd failed in LANCZOS_DIAGONALIZE. info=', info
+     stop 'ARPACK dsaupd failed in LANCZOS_DIAGONALIZE'
+  end if
+  if (nconv < nev) then
+     print*, 'ARPACK did not converge all requested states in LANCZOS_DIAGONALIZE. ',&
+          'nconv=', nconv, ' nev=', nev, ' iterations=', iparam(3), ' info=', info
+     stop 'ARPACK did not converge all requested states in LANCZOS_DIAGONALIZE'
+  end if
   sigma = 0.d0
   call dseupd( rvec, howmny, selct, d, Z, ldv, sigma, &
        bmat, n, which, nev, tol, resid, ncv, v, ldv, &
        iparam, ipntr, workd, workl, lworkl, info )
-  if (info /= 0) stop 'ARPACK dseupd failed in LANCZOS_DIAGONALIZE'
+  if (info /= 0) then
+     print*, 'ARPACK dseupd failed in LANCZOS_DIAGONALIZE. info=', info
+     stop 'ARPACK dseupd failed in LANCZOS_DIAGONALIZE'
+  end if
   
   ! right now Z contains the eigenvectors in the columns
   ! d contains the eigenvalues in the same order. 
@@ -473,18 +483,28 @@ subroutine LANCZOS_ISOSPIN_CHANGER(jbas,OP,Vecs,nev)
    allocate(selct(NCV)) 
    selct = .false.
    allocate(D(NEV)) 
-   allocate(Z(N,NEV)) 
-   D = 0.d0
-   Z = 0.d0
-   ldz = N  
+  allocate(Z(N,NEV)) 
+  D = 0.d0
+  Z = 0.d0
+  ldz = N  
   nconv = iparam(5)
-  if (info < 0) stop 'ARPACK dsaupd failed in LANCZOS_ISOSPIN_CHANGER'
-  if (nconv < nev) stop 'ARPACK did not converge all requested states in LANCZOS_ISOSPIN_CHANGER'
+  if (info < 0) then
+     print*, 'ARPACK dsaupd failed in LANCZOS_ISOSPIN_CHANGER. info=', info
+     stop 'ARPACK dsaupd failed in LANCZOS_ISOSPIN_CHANGER'
+  end if
+  if (nconv < nev) then
+     print*, 'ARPACK did not converge all requested states in LANCZOS_ISOSPIN_CHANGER. ',&
+          'nconv=', nconv, ' nev=', nev, ' iterations=', iparam(3), ' info=', info
+     stop 'ARPACK did not converge all requested states in LANCZOS_ISOSPIN_CHANGER'
+  end if
   sigma = 0.d0
   call dseupd( rvec, howmny, selct, d, Z, ldv, sigma, &
        bmat, n, which, nev, tol, resid, ncv, v, ldv, &
        iparam, ipntr, workd, workl, lworkl, info )
-  if (info /= 0) stop 'ARPACK dseupd failed in LANCZOS_ISOSPIN_CHANGER'
+  if (info /= 0) then
+     print*, 'ARPACK dseupd failed in LANCZOS_ISOSPIN_CHANGER. info=', info
+     stop 'ARPACK dseupd failed in LANCZOS_ISOSPIN_CHANGER'
+  end if
   
   ! right now Z contains the eigenvectors in the columns
   ! d contains the eigenvalues in the same order. 
