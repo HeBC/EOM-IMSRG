@@ -13,7 +13,7 @@ contains
 subroutine calculate_excited_states(J,PAR,Numstates,HS,jbas,ladder_ops) 
   implicit none
    
-  real(8) :: BE,Mfi ,SD_shell_content,dEtrips,dcgi,dcgi00
+  real(8) :: BE,Mfi ,SD_shell_content,dEtrips = 0.d0,dcgi,dcgi00
   real(8) :: t1,t2,t0,omp_get_wtime,XX,QQ,sm,sm2 
   type(obsv_mgr) :: transitions, moments 
   type(spd) :: jbas
@@ -23,8 +23,6 @@ subroutine calculate_excited_states(J,PAR,Numstates,HS,jbas,ladder_ops)
   character(2) :: Jlabel,Plabel,betalabel  
   character(2) :: statelabel
   REAL(8),dimension(Numstates) :: Es,BEs ,moms ,trips
-
-  dEtrips = 0.d0
 
   ladder_ops%herm = 1
   ladder_ops%rank = J 
