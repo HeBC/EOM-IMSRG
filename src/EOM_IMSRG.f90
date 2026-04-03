@@ -280,7 +280,12 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   mode = 1
    
   allocate(eigs(N),resid(N),work(10*N),workD(3*N)) 
-  
+  resid = 0.d0
+  if (N > 0) resid(1) = 1.d0
+  iparam = 0
+  ipntr = 0
+  info = 1
+
   iparam(1) = ishift
   iparam(3) = mxiter
   iparam(7) = mode
@@ -314,6 +319,7 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   howmny = 'A'
   
   allocate(selct(NCV)) 
+  selct = .false.
   allocate(D(NEV)) 
   allocate(Z(N,NEV)) 
   ldz = N  
@@ -422,6 +428,11 @@ subroutine LANCZOS_ISOSPIN_CHANGER(jbas,OP,Vecs,nev)
   mode = 1
    
   allocate(eigs(N),resid(N),work(10*N),workD(3*N)) 
+  resid = 0.d0
+  if (N > 0) resid(1) = 1.d0
+  iparam = 0
+  ipntr = 0
+  info = 1
 
   iparam(1) = ishift
   iparam(3) = mxiter
@@ -453,6 +464,7 @@ subroutine LANCZOS_ISOSPIN_CHANGER(jbas,OP,Vecs,nev)
   howmny = 'A'
   
   allocate(selct(NCV)) 
+  selct = .false.
   allocate(D(NEV)) 
   allocate(Z(N,NEV)) 
   ldz = N  
