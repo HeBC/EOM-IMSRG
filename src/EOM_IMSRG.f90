@@ -1626,6 +1626,7 @@ integer function read_eom_file(trs,mom,eom_states,jbas)
   read(44,*) num_jpi
 
   eom_states%num = num_jpi
+  eom_states%total_dtz = 0
   allocate(eom_states%name(num_jpi))
   allocate(eom_states%dTz(num_jpi)) 
   allocate(eom_states%ang_mom(num_jpi))
