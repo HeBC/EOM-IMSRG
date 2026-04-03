@@ -24,6 +24,8 @@ subroutine calculate_excited_states(J,PAR,Numstates,HS,jbas,ladder_ops)
   character(2) :: statelabel
   REAL(8),dimension(Numstates) :: Es,BEs ,moms ,trips
 
+  dEtrips = 0.d0
+
   ladder_ops%herm = 1
   ladder_ops%rank = J 
   ladder_ops%dpar = PAR
@@ -49,9 +51,7 @@ subroutine calculate_excited_states(J,PAR,Numstates,HS,jbas,ladder_ops)
    do i = 2, Numstates
       call duplicate_sq_op(ladder_ops(1),ladder_ops(i),'y')
    end do
-   dEtrips = 0.d0
-   
-   print* 
+    print* 
   write(*,'((A55),(I1),(A3),(I1),(A))') 'EXECUTING EOM CALCULATION'// &
        ' FOR EXCITED STATES: J=',J/2,' P=',PAR," for "//&
        nucleus_name(HS%Aneut,HS%Aprot)     
