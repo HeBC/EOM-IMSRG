@@ -12,8 +12,8 @@ contains
 
 subroutine calculate_excited_states(J,PAR,Numstates,HS,jbas,ladder_ops) 
   implicit none
-  
-  real(8) :: BE,Mfi ,SD_shell_content,dEtrips,dcgi,dcgi00
+   
+  real(8) :: BE,Mfi ,SD_shell_content,dEtrips = 0.d0,dcgi,dcgi00
   real(8) :: t1,t2,t0,omp_get_wtime,XX,QQ,sm,sm2 
   type(obsv_mgr) :: transitions, moments 
   type(spd) :: jbas
@@ -46,11 +46,10 @@ subroutine calculate_excited_states(J,PAR,Numstates,HS,jbas,ladder_ops)
      ladder_ops(1)%tblck(q)%lam(1) = 1 
   end do
     
-  do i = 2, Numstates
-     call duplicate_sq_op(ladder_ops(1),ladder_ops(i),'y')
-  end do
-  
-  print* 
+   do i = 2, Numstates
+      call duplicate_sq_op(ladder_ops(1),ladder_ops(i),'y')
+   end do
+    print* 
   write(*,'((A55),(I1),(A3),(I1),(A))') 'EXECUTING EOM CALCULATION'// &
        ' FOR EXCITED STATES: J=',J/2,' P=',PAR," for "//&
        nucleus_name(HS%Aneut,HS%Aprot)     
@@ -492,6 +491,10 @@ subroutine matvec_prod(N,OP,Q_op,Qout,w1,w2,OpCC,QCC,WCC,jbas,v,w)
   
   ! FIRST WE NEED TO CONVERT v TO a (SQ_OP) variable
   
+  call zero_sq_op_wkspc(Q_op)
+  call zero_sq_op_wkspc(Qout)
+  call zero_sq_op_wkspc(w1)
+  call zero_sq_op_wkspc(w2)
   call unwrap(v,Q_op,N,jbas)
 
   ! now we have two sq_op operators which can be used with my commutator expressions. Noice. 
@@ -532,6 +535,10 @@ subroutine matvec_nonzeroX_prod(N,OP,Q_op,Qout,w1,w2,OpCC,QCC,WCC,jbas,v,w)
 
   
   ! FIRST WE NEED TO CONVERT v TO a (SQ_OP) variable
+  call zero_sq_op_wkspc(Q_op)
+  call zero_sq_op_wkspc(Qout)
+  call zero_sq_op_wkspc(w1)
+  call zero_sq_op_wkspc(w2)
 
   call unwrap_tensor(v,Q_op,N,jbas)
   ! now we have two sq_op operators which can be used with my commutator expressions. Noice. 
@@ -574,6 +581,8 @@ subroutine matvec_ISOX_prod(N,OP,Q_op,Qout,jbas,v,w)
 
   
   ! FIRST WE NEED TO CONVERT v TO a (SQ_OP) variable
+  call zero_iso_ladder_wkspc(Q_op)
+  call zero_iso_ladder_wkspc(Qout)
 
   call unwrap_iso_ladder(v,Q_op,N,jbas)
   ! now we have two sq_op operators which can be used with my commutator expressions. Noice. 
@@ -591,6 +600,53 @@ subroutine matvec_ISOX_prod(N,OP,Q_op,Qout,jbas,v,w)
   call rewrap_iso_ladder(w,Qout,N,jbas) 
 
 end subroutine
+!======================================================================================
+!======================================================================================
+subroutine zero_sq_op_wkspc(OP)
+  implicit none
+
+  type(sq_op) :: OP
+  integer :: q,g
+
+  if (allocated(OP%fph)) OP%fph = 0.d0
+  if (allocated(OP%fpp)) OP%fpp = 0.d0
+  if (allocated(OP%fhh)) OP%fhh = 0.d0
+
+  if (allocated(OP%mat)) then
+     do q = 1, size(OP%mat)
+        do g = 1, size(OP%mat(q)%gam)
+           if (.not. allocated(OP%mat(q)%gam(g)%X)) cycle
+           OP%mat(q)%gam(g)%X = 0.d0
+        end do
+     end do
+  end if
+
+  if (allocated(OP%tblck)) then
+     do q = 1, size(OP%tblck)
+        do g = 1, size(OP%tblck(q)%tgam)
+           if (.not. allocated(OP%tblck(q)%tgam(g)%X)) cycle
+           OP%tblck(q)%tgam(g)%X = 0.d0
+        end do
+     end do
+  end if
+end subroutine zero_sq_op_wkspc
+!======================================================================================
+!======================================================================================
+subroutine zero_iso_ladder_wkspc(OP)
+  implicit none
+
+  type(iso_ladder) :: OP
+  integer :: q
+
+  if (allocated(OP%fph)) OP%fph = 0.d0
+
+  if (allocated(OP%tblck)) then
+     do q = 1, size(OP%tblck)
+        if (.not. allocated(OP%tblck(q)%Xpphh)) cycle
+        OP%tblck(q)%Xpphh = 0.d0
+     end do
+  end if
+end subroutine zero_iso_ladder_wkspc
 !======================================================================================
 !======================================================================================
 subroutine unwrap( v, AX ,N ,jbas) 
@@ -1626,6 +1682,7 @@ integer function read_eom_file(trs,mom,eom_states,jbas)
   read(44,*) num_jpi
 
   eom_states%num = num_jpi
+  eom_states%total_dtz = 0
   allocate(eom_states%name(num_jpi))
   allocate(eom_states%dTz(num_jpi)) 
   allocate(eom_states%ang_mom(num_jpi))

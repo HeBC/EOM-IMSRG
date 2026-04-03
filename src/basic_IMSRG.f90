@@ -1009,6 +1009,7 @@ subroutine divide_work_tensor(r1)
   b = 0.d0
   do q = 1, r1%nblocks
      do spot = 1, 9
+        if (.not. allocated(r1%tblck(q)%tgam(spot)%X)) cycle
         b = b + size(r1%tblck(q)%tgam(spot)%X) 
      end do 
   end do
@@ -1027,6 +1028,7 @@ subroutine divide_work_tensor(r1)
      
      do while ( q .le. r1%nblocks) 
         do spot = 1, 9
+           if (.not. allocated(r1%tblck(q)%tgam(spot)%X)) cycle
            k = k + size(r1%tblck(q)%tgam(spot)%X) 
         end do
         q = q + 1
@@ -4934,6 +4936,3 @@ subroutine project_1p1h(Q)
 
 end subroutine project_1p1h
 end module       
-
-
-
