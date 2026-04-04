@@ -274,13 +274,18 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   ncv = min(N,max(20,5*nev)) ! number of Lanczos basis vectors retained by ARPACK
   lworkl = ncv*(ncv+8) 
   allocate(V(N,NCV),workl(lworkl))
+  V = 0.d0
+  workl = 0.d0
   LDV = N  
   ishift = 1
   mxiter = 5000 
   mode = 1
    
   allocate(eigs(N),resid(N),work(10*N),workD(3*N)) 
+  eigs = 0.d0
   resid = 0.d0
+  work = 0.d0
+  workd = 0.d0
   if (N > 0) resid(1) = 1.d0
   iparam = 0
   ipntr = 0
@@ -347,6 +352,7 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   ! right now Z contains the eigenvectors in the columns
   ! d contains the eigenvalues in the same order. 
   do i = 1, nev
+     call zero_sq_op_wkspc(Vecs(i))
      call unwrap_tensor(Z(:,i),Vecs(i),N,jbas) 
      Vecs(i)%E0 = d(i)
   end do 
@@ -439,13 +445,18 @@ subroutine LANCZOS_ISOSPIN_CHANGER(jbas,OP,Vecs,nev)
   ncv = min(N,max(20,5*nev)) ! number of Lanczos basis vectors retained by ARPACK
   lworkl = ncv*(ncv+8) 
   allocate(V(N,NCV),workl(lworkl))
+  V = 0.d0
+  workl = 0.d0
   LDV = N  
   ishift = 1
   mxiter = 5000 
   mode = 1
    
   allocate(eigs(N),resid(N),work(10*N),workD(3*N)) 
+  eigs = 0.d0
   resid = 0.d0
+  work = 0.d0
+  workd = 0.d0
   if (N > 0) resid(1) = 1.d0
   iparam = 0
   ipntr = 0
@@ -509,6 +520,7 @@ subroutine LANCZOS_ISOSPIN_CHANGER(jbas,OP,Vecs,nev)
   ! right now Z contains the eigenvectors in the columns
   ! d contains the eigenvalues in the same order. 
   do i = 1, nev
+     call zero_iso_ladder_wkspc(Vecs(i))
      call unwrap_iso_ladder(Z(:,i),Vecs(i),N,jbas) 
      Vecs(i)%E0 = d(i)
   end do 
@@ -585,6 +597,7 @@ subroutine matvec_nonzeroX_prod(N,OP,Q_op,Qout,w1,w2,OpCC,QCC,WCC,jbas,v,w)
   call zero_sq_op_wkspc(Qout)
   call zero_sq_op_wkspc(w1)
   call zero_sq_op_wkspc(w2)
+  call zero_ex_pandya_wkspc(QCC)
   call zero_ex_pandya_wkspc(WCC)
 
   call unwrap_tensor(v,Q_op,N,jbas)
