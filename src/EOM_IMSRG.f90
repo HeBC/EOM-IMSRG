@@ -176,6 +176,9 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   real(8),allocatable,dimension(:,:) :: V,Z
   integer :: i,j,ix,jx,lwork,info,ido,ncv,ldv,iparam(11),ipntr(11),q,II,JJ
   integer :: ishift,mxiter,nb,nconv,mode,np,lworkl,ldz,p,h,sps,tps,jp,jh
+  integer :: k_tda,lwork_tda,info_tda
+  real(8),allocatable,dimension(:,:) :: TDA_mat
+  real(8),allocatable,dimension(:) :: TDA_eigs,TDA_work
   real(8) ::  x,tol,y,sigma,t1,t2
   character(1) :: BMAT,HOWMNY 
   character(2) :: which
@@ -293,6 +296,34 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   iparam = 0
   ipntr = 0
   info = 1 ! tell ARPACK to use the starting vector stored in resid
+
+  ! ---- TDA(1p1h) diagonalization ----
+  ! Build the sps x sps 1p1h block of the EOM matrix and diagonalize with LAPACK
+  if (sps > 0) then
+     allocate(TDA_mat(sps,sps), TDA_eigs(sps))
+     TDA_mat = 0.d0
+     do k_tda = 1, sps
+        workd(1:N) = 0.d0
+        workd(N+1:2*N) = 0.d0
+        workd(k_tda) = 1.d0
+        call matvec_nonzeroX_prod(N,OP,Q1,Q2,w1,w2,OpPP,QPP,WPP,jbas, &
+             workd(1), workd(N+1))
+        TDA_mat(1:sps, k_tda) = workd(N+1:N+sps)
+     end do
+     lwork_tda = max(1, 3*sps - 1)
+     allocate(TDA_work(lwork_tda))
+     call dsyev('N', 'U', sps, TDA_mat, sps, TDA_eigs, TDA_work, lwork_tda, info_tda)
+     deallocate(TDA_work, TDA_mat)
+     print*
+     print*, 'TDA(1p1h) ENERGIES:'
+     print*, '=============================================='
+     print*, '      dE           E_0 + dE'
+     print*, '=============================================='
+     do k_tda = 1, min(nev, sps)
+        write(*,'(2(f16.9))') TDA_eigs(k_tda), TDA_eigs(k_tda) + OP%E0
+     end do
+     deallocate(TDA_eigs)
+  end if
 
   iparam(1) = ishift
   iparam(3) = mxiter
