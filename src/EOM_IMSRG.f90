@@ -194,7 +194,8 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
  
   call init_ph_mat(Op,OpPP,jbas) !cross coupled ME
   call init_ph_mat(vecs(1),QPP,jbas) !cross coupled ME
-  call init_ph_wkspc(QPP,WPP) 
+  call init_ph_wkspc(QPP,WPP)
+  call calculate_cross_coupled_pphh(Op,OpPP,jbas) ! Op is constant; compute once before the Lanczos loop
   
   h = OP%belowEF !holes
   p = OP%Nsp-h  !particles
@@ -606,8 +607,8 @@ subroutine matvec_nonzeroX_prod(N,OP,Q_op,Qout,w1,w2,OpCC,QCC,WCC,jbas,v,w)
   ! now we have two sq_op operators which can be used with my commutator expressions. Noice. 
   
   call EOM_generalized_pandya(Q_op,QCC,jbas)
-  call calculate_cross_coupled_pphh(Op,OpCC,jbas) 
-  
+  ! OpCC (cross-coupled H) is pre-computed once in LANCZOS_DIAGONALIZE; no need to recompute here
+
   call EOM_TS_commutator_111(Op,Q_op,Qout,jbas) 
   call EOM_TS_commutator_121(Op,Q_op,Qout,jbas)
   call EOM_TS_commutator_211(OpCC,Q_op,Qout,jbas) 
