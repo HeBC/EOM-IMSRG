@@ -6,6 +6,8 @@ module EOM_IMSRG
   use isospin_operators
   use EOM_dTZ_commutators
   implicit none
+  integer, parameter :: MIN_ARPACK_BASIS = 20
+  integer, parameter :: MAX_ARPACK_ITERATIONS = 5000
   
 contains 
 
@@ -271,14 +273,14 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   which = 'SM' ! compute smallest eigenvalues in magnitude ('SA') is algebraic. 
   tol = 1.0E-10 ! error tolerance? (wtf zero?) 
   info = 0
-  ncv = min(N,max(20,5*nev)) ! number of Lanczos basis vectors retained by ARPACK
+  ncv = min(N,max(MIN_ARPACK_BASIS,5*nev)) ! number of Lanczos basis vectors retained by ARPACK
   lworkl = ncv*(ncv+8) 
   allocate(V(N,NCV),workl(lworkl))
   V = 0.d0
   workl = 0.d0
   LDV = N  
   ishift = 1
-  mxiter = 5000 ! allow harder platforms/BLAS stacks to converge the full testcase spectrum
+  mxiter = MAX_ARPACK_ITERATIONS ! allow harder platforms/BLAS stacks to converge the full testcase spectrum
   mode = 1
    
   allocate(eigs(N),resid(N),work(10*N),workD(3*N)) 
@@ -286,10 +288,10 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   resid = 0.d0
   work = 0.d0
   workd = 0.d0
-  if (N > 0) resid(1) = 1.d0
+  if (N > 0) resid(1) = 1.d0 ! deterministic starting vector for ARPACK
   iparam = 0
   ipntr = 0
-  info = 1
+  info = 1 ! tell ARPACK to use the starting vector stored in resid
 
   iparam(1) = ishift
   iparam(3) = mxiter
@@ -442,14 +444,14 @@ subroutine LANCZOS_ISOSPIN_CHANGER(jbas,OP,Vecs,nev)
   which = 'SM' ! compute smallest eigenvalues in magnitude ('SA') is algebraic. 
   tol = 1.0E-10 ! error tolerance? (wtf zero?) 
   info = 0
-  ncv = min(N,max(20,5*nev)) ! number of Lanczos basis vectors retained by ARPACK
+  ncv = min(N,max(MIN_ARPACK_BASIS,5*nev)) ! number of Lanczos basis vectors retained by ARPACK
   lworkl = ncv*(ncv+8) 
   allocate(V(N,NCV),workl(lworkl))
   V = 0.d0
   workl = 0.d0
   LDV = N  
   ishift = 1
-  mxiter = 5000 ! allow harder platforms/BLAS stacks to converge the full testcase spectrum
+  mxiter = MAX_ARPACK_ITERATIONS ! allow harder platforms/BLAS stacks to converge the full testcase spectrum
   mode = 1
    
   allocate(eigs(N),resid(N),work(10*N),workD(3*N)) 
@@ -457,10 +459,10 @@ subroutine LANCZOS_ISOSPIN_CHANGER(jbas,OP,Vecs,nev)
   resid = 0.d0
   work = 0.d0
   workd = 0.d0
-  if (N > 0) resid(1) = 1.d0
+  if (N > 0) resid(1) = 1.d0 ! deterministic starting vector for ARPACK
   iparam = 0
   ipntr = 0
-  info = 1
+  info = 1 ! tell ARPACK to use the starting vector stored in resid
 
   iparam(1) = ishift
   iparam(3) = mxiter
