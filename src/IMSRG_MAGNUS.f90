@@ -70,16 +70,19 @@ subroutine magnus_decouple(HS,G,jbas,quads,trips,build_generator)
   if (chkpoint_restart) then 
   
 
+
+     Eold=0.
+     E_mbpt2 = mbpt2(HS,jbas) 
+     crit=abs(E_mbpt2)
+     first = .false.  
+
      open(unit=36,file=trim(OUTPUT_DIR)//&
        trim(adjustl(prefix))//'_0b_magnus_flow.dat')
 
      
      write(36,'(I6,4(e15.7))') steps,s,H%E0,HS%E0+E_mbpt2,crit
      write(*,'(I6,4(e15.7))') steps,s,HS%E0,HS%E0+E_mbpt2,crit
-     Eold=0.
-     E_mbpt2 = mbpt2(HS,jbas) 
-     crit=abs(E_mbpt2)
-     first = .false.  
+
   else 
 
      ! CHECKPOINT RESTART
@@ -191,7 +194,7 @@ subroutine BCH_EXPAND(HS,G,H,jbas,quads)
  
   advals(1) = abs(H%E0)   
 
-  do iw = 2 ,40
+  do iw = 2 ,size(advals)
 
      coef = coef/(iw-1.d0) 
      ! current value of HS is renamed INT1 
@@ -273,7 +276,7 @@ subroutine BCH_EXPAND_1b(HS,G,H,jbas,quads)
  
   advals(1) = abs(H%E0)   
 
-  do iw = 2 ,60
+  do iw = 2 ,size(advals)
      coef = coef/(iw-1.d0) 
      ! current value of HS is renamed INT1 
      ! INT2 is renamed AD, for the AD parameters in BCH and magnus expansions
@@ -347,7 +350,7 @@ subroutine BCH_EXPAND_2b(HS,G,H,jbas,quads)
  
   advals(1) = abs(H%E0)   
 
-  do iw = 2 ,40
+  do iw = 2 ,size(advals)
 
      coef = coef/(iw-1.d0) 
      ! current value of HS is renamed INT1 
