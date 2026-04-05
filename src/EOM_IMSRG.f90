@@ -176,9 +176,9 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   real(8),allocatable,dimension(:,:) :: V,Z
   integer :: i,j,ix,jx,lwork,info,ido,ncv,ldv,iparam(11),ipntr(11),q,II,JJ
   integer :: ishift,mxiter,nb,nconv,mode,np,lworkl,ldz,p,h,sps,tps,jp,jh
-  integer :: k_tda,lwork_tda,info_tda
+  integer :: k_tda,lwork_tda,info_tda,k_tps
   real(8),allocatable,dimension(:,:) :: TDA_mat
-  real(8),allocatable,dimension(:) :: TDA_eigs,TDA_work
+  real(8),allocatable,dimension(:) :: TDA_eigs,TDA_work,col_buf
   real(8) ::  x,tol,y,sigma,t1,t2
   character(1) :: BMAT,HOWMNY 
   character(2) :: which
@@ -297,19 +297,28 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
   ipntr = 0
   info = 1 ! tell ARPACK to use the starting vector stored in resid
 
-  ! ---- TDA(1p1h) diagonalization ----
-  ! Build the sps x sps 1p1h block of the EOM matrix and diagonalize with LAPACK
+  ! ---- TDA(1p1h) diagonalization and matrix block dump ----
+  ! Build the sps x sps 1p1h block of the EOM matrix and diagonalize with LAPACK.
+  ! While doing so, write A11 (1p1h->1p1h) and A21 (2p2h->1p1h) columns to files.
+  allocate(col_buf(N))
   if (sps > 0) then
      allocate(TDA_mat(sps,sps), TDA_eigs(sps))
      TDA_mat = 0.d0
+     open(unit=81,file=trim(OUTPUT_DIR)//trim(adjustl(prefix))//'_A11.dat')
+     open(unit=82,file=trim(OUTPUT_DIR)//trim(adjustl(prefix))//'_A21.dat')
      do k_tda = 1, sps
         workd(1:N) = 0.d0
         workd(N+1:2*N) = 0.d0
         workd(k_tda) = 1.d0
         call matvec_nonzeroX_prod(N,OP,Q1,Q2,w1,w2,OpPP,QPP,WPP,jbas, &
              workd(1), workd(N+1))
-        TDA_mat(1:sps, k_tda) = workd(N+1:N+sps)
+        col_buf(1:N) = workd(N+1:2*N)
+        TDA_mat(1:sps, k_tda) = col_buf(1:sps)
+        write(81,*) col_buf(1:sps)
+        if (tps > 0) write(82,*) col_buf(sps+1:N)
      end do
+     close(81)
+     close(82)
      lwork_tda = max(1, 3*sps - 1)
      allocate(TDA_work(lwork_tda))
      call dsyev('N', 'U', sps, TDA_mat, sps, TDA_eigs, TDA_work, lwork_tda, info_tda)
@@ -324,6 +333,25 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
      end do
      deallocate(TDA_eigs)
   end if
+  ! Build A12 (1p1h rows, 2p2h columns) and A22 (2p2h rows, 2p2h columns)
+  ! by applying matvec to each unit 2p2h basis vector.
+  if (tps > 0) then
+     open(unit=83,file=trim(OUTPUT_DIR)//trim(adjustl(prefix))//'_A12.dat')
+     open(unit=84,file=trim(OUTPUT_DIR)//trim(adjustl(prefix))//'_A22.dat')
+     do k_tps = 1, tps
+        workd(1:N) = 0.d0
+        workd(N+1:2*N) = 0.d0
+        workd(sps+k_tps) = 1.d0
+        call matvec_nonzeroX_prod(N,OP,Q1,Q2,w1,w2,OpPP,QPP,WPP,jbas, &
+             workd(1), workd(N+1))
+        col_buf(1:N) = workd(N+1:2*N)
+        if (sps > 0) write(83,*) col_buf(1:sps)
+        write(84,*) col_buf(sps+1:N)
+     end do
+     close(83)
+     close(84)
+  end if
+  deallocate(col_buf)
 
   iparam(1) = ishift
   iparam(3) = mxiter
