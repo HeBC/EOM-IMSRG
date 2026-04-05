@@ -322,6 +322,7 @@ subroutine LANCZOS_DIAGONALIZE(jbas,OP,Vecs,nev)
      lwork_tda = max(1, 3*sps - 1)
      allocate(TDA_work(lwork_tda))
      call dsyev('N', 'U', sps, TDA_mat, sps, TDA_eigs, TDA_work, lwork_tda, info_tda)
+     if (info_tda /= 0) print*, 'WARNING: dsyev (TDA) returned info =', info_tda
      deallocate(TDA_work, TDA_mat)
      print*
      print*, 'TDA(1p1h) ENERGIES:'
